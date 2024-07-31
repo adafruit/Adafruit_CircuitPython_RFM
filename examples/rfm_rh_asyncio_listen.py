@@ -12,8 +12,6 @@ import board
 import busio
 import digitalio
 
-from adafruit_rfm import rfm9x
-
 # Define radio parameters.
 RADIO_FREQ_MHZ = 915.0  # Frequency of the radio in Mhz. Must match your
 # module! Can be a value like 915.0, 433.0, etc.
@@ -26,11 +24,30 @@ RESET = digitalio.DigitalInOut(board.D25)
 spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
 
 # Initialze RFM radio
-rfm9x = rfm9x.RFM9x(spi, CS, RESET, RADIO_FREQ_MHZ)
+# uncommnet the desired import and rfm initialization depending on the radio boards being used
+
+# Use rfm9x for two RFM9x radios using LoRa
+
+from adafruit_rfm import rfm9x
+
+rfm = rfm9x.RFM9x(spi, CS, RESET, RADIO_FREQ_MHZ)
+
+# Use rfm9xfsk for two RFM9x radios or RFM9x to RFM69 using FSK
+
+# from adafruit_rfm import rfm9xfsk
+
+# rfm = rfm9xfsk.RFM9xFSK(spi, CS, RESET, RADIO_FREQ_MHZ)
+
+# Use rfm69 for two RFM69 radios using FSK
+
+# from adafruit_rfm import rfm69
+
+# rfm = rfm69.RFM69(spi, CS, RESET, RADIO_FREQ_MHZ)
+
 
 # send startup message from my_node
-rfm9x.send(bytes(f"startup message from node {rfm9x.node}", "UTF-8"))
-rfm9x.listen()
+# rfm.send(bytes("startup message from node {}".format(rfm.node), "UTF-8"))
+rfm.listen()
 # Wait to receive packets.
 print("Waiting for packets...")
 # initialize flag and timer
@@ -47,41 +64,23 @@ class Packet:
 # setup interrupt callback function
 async def wait_for_packets(packet_status):
     while True:
-        if rfm9x.payload_ready():
-            packet = await rfm9x.asyncio_receive(with_header=True, timeout=None)
+        if rfm.payload_ready():
+            packet = await rfm.asyncio_receive(with_header=True, timeout=None)
             if packet is not None:
                 packet_status.received = True
                 # Received a packet!
                 # Print out the raw bytes of the packet:
                 print(f"Received (raw bytes): {packet}")
                 print([hex(x) for x in packet])
-                print(f"RSSI: {rfm9x.last_rssi}")
-        await asyncio.sleep(0.001)
-
-
-async def send_packets(packet_status):
-    # initialize counter
-    counter = 0
-    while True:
-        # If no packet was received during the timeout then None is returned.
-        if packet_status.received:
-            packet_status.received = False
-            await asyncio.sleep(0.5)  # delay .5 seconds before responding
-            counter += 1
-            # send a  mesage to destination_node from my_node
-            await rfm9x.asyncio_send(
-                bytes(f"message from node node {rfm9x.node} {counter}", "UTF-8"),
-                keep_listening=True,
-            )
+                print(f"RSSI: {rfm.last_rssi}")
         await asyncio.sleep(0.001)
 
 
 async def main():
     packet_status = Packet()
     task1 = asyncio.create_task(wait_for_packets(packet_status))
-    task2 = asyncio.create_task(send_packets(packet_status))
 
-    await asyncio.gather(task1, task2)  # Don't forget "await"!
+    await asyncio.gather(task1)  # Don't forget "await"!
 
 
 asyncio.run(main())

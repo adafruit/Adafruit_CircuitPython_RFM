@@ -8,8 +8,6 @@ import board
 import busio
 import digitalio
 
-from adafruit_rfm import rfm9x
-
 # Define radio parameters.
 RADIO_FREQ_MHZ = 915.0  # Frequency of the radio in Mhz. Must match your
 # module! Can be a value like 915.0, 433.0, etc.
@@ -22,14 +20,33 @@ RESET = digitalio.DigitalInOut(board.D25)
 spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
 
 # Initialze RFM radio
-rfm9x = rfm9x.RFM9x(spi, CS, RESET, RADIO_FREQ_MHZ)
+# uncommnet the desired import and rfm initialization depending on the radio boards being used
+
+# Use rfm9x for two RFM9x radios using LoRa
+
+from adafruit_rfm import rfm9x
+
+rfm = rfm9x.RFM9x(spi, CS, RESET, RADIO_FREQ_MHZ)
+
+# Use rfm9xfsk for two RFM9x radios or RFM9x to RFM69 using FSK
+
+# from adafruit_rfm import rfm9xfsk
+
+# rfm = rfm9xfsk.RFM9xFSK(spi, CS, RESET, RADIO_FREQ_MHZ)
+
+# Use rfm69 for two RFM69 radios using FSK
+
+# from adafruit_rfm import rfm69
+
+# rfm = rfm69.RFM69(spi, CS, RESET, RADIO_FREQ_MHZ)
+
 
 # set node addresses
-rfm9x.node = 1
-rfm9x.destination = 100
+rfm.node = 1
+rfm.destination = 100
 # send startup message from my_node
-rfm9x.send_with_ack(bytes(f"startup message from node {rfm9x.node}", "UTF-8"))
-rfm9x.listen()
+rfm.send_with_ack(bytes(f"startup message from node {rfm.node}", "UTF-8"))
+rfm.listen()
 # Wait to receive packets.
 print("Waiting for packets...")
 # initialize flag and timer
@@ -46,18 +63,18 @@ class Packet:
 # setup interrupt callback function
 async def wait_for_packets(packet_status, lock):
     while True:
-        if rfm9x.payload_ready():
+        if rfm.payload_ready():
             if lock.locked():
                 print("locked waiting for receive")
             async with lock:
-                packet = await rfm9x.asyncio_receive_with_ack(with_header=True, timeout=None)
+                packet = await rfm.asyncio_receive_with_ack(with_header=True, timeout=None)
             if packet is not None:
                 packet_status.received = True
                 # Received a packet!
                 # Print out the raw bytes of the packet:
                 print(f"Received (raw bytes): {packet}")
                 print([hex(x) for x in packet])
-                print(f"RSSI: {rfm9x.last_rssi}")
+                print(f"RSSI: {rfm.last_rssi}")
         await asyncio.sleep(0.001)
 
 
@@ -80,9 +97,9 @@ async def send_packets(packet_status, lock):
             if lock.locked():
                 print("locked waiting for send")
             async with lock:
-                if not await rfm9x.asyncio_send_with_ack(
+                if not await rfm.asyncio_send_with_ack(
                     bytes(
-                        f"message from node {rfm9x.node} {counter} {ack_failed_counter}",
+                        f"message from node {rfm.node} {counter} {ack_failed_counter}",
                         "UTF-8",
                     )
                 ):

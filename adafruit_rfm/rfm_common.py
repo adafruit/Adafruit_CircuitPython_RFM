@@ -37,7 +37,7 @@ except ImportError:
 
 
 __version__ = "0.0.0+auto.0"
-__repo__ = "https://github.com/jerryneedell/CircuitPython_RFM.git"
+__repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_RFM.git"
 
 
 # RadioHead specific compatibility constants.
@@ -378,7 +378,7 @@ class RFMSPI:
 
     send_with_ack = asyncio_to_blocking(asyncio_send_with_ack)
 
-    async def asyncio_receive(
+    async def asyncio_receive(  # noqa: PLR0912
         self,
         *,
         keep_listening: bool = True,
@@ -425,6 +425,9 @@ class RFMSPI:
             else:
                 packet = self.read_fifo()
                 if self.radiohead:
+                    if len(packet) < 5:
+                        # reject the packet if it is too small to contain the RAdioHead Header
+                        packet = None
                     if packet is not None:
                         if (
                             self.node != _RH_BROADCAST_ADDRESS  # noqa: PLR1714
@@ -492,6 +495,9 @@ class RFMSPI:
             else:
                 packet = self.read_fifo()
                 if self.radiohead:
+                    if len(packet) < 5:
+                        # reject the packet if it is too small to contain the RAdioHead Header
+                        packet = None
                     if packet is not None:
                         if (
                             self.node != _RH_BROADCAST_ADDRESS  # noqa: PLR1714

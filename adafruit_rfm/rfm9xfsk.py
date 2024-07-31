@@ -32,7 +32,7 @@ except ImportError:
     pass
 
 __version__ = "0.0.0+auto.0"
-__repo__ = "https://github.com/jerryneedell/CircuitPython_RFM.git"
+__repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_RFM.git"
 
 # pylint: disable=duplicate-code
 
@@ -170,12 +170,10 @@ class RFM9xFSK(RFMSPI):
 
     Also note this library tries to be compatible with raw RadioHead Arduino
     library communication. This means the library sets up the radio modulation
-    to match RadioHead's defaults and assumes that each packet contains a
-    4 byte header compatible with RadioHead's implementation.
+    to match RadioHead's defaults.
     Advanced RadioHead features like address/node specific packets
     or "reliable datagram" delivery are supported however due to the
-    limitations noted, "reliable datagram" is still subject to missed packets but with it,
-    sender is notified if a packet has potentially been missed.
+    limitations noted, "reliable datagram" is still subject to missed packets.
     """
 
     operation_mode = RFMSPI.RegisterBits(_RF95_REG_01_OP_MODE, bits=3)
@@ -567,12 +565,8 @@ class RFM9xFSK(RFMSPI):
         """Read the data from the FIFO."""
         # Read the length of the FIFO.
         fifo_length = self.read_u8(_RF95_REG_00_FIFO)
-        # Handle if the received packet is too small to include the 4 byte
-        # RadioHead header and at least one byte of data --reject this packet and ignore it.
         if fifo_length > 0:  # read and clear the FIFO if anything in it
             packet = bytearray(fifo_length)
             # read the packet
             self.read_into(_RF95_REG_00_FIFO, packet, fifo_length)
-        if fifo_length < 5:
-            packet = None
         return packet

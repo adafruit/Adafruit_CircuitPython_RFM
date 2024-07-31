@@ -6,17 +6,15 @@
 `adafruit_rfm69`
 ====================================================
 
-CircuitPython RFM69 packet radio module. This supports basic RadioHead-compatible sending and
+CircuitPython RFM69 packet radio module. This supports sending and
 receiving of packets with RFM69 series radios (433/915Mhz).
 
 .. warning:: This is NOT for LoRa radios!
 
-.. note:: This is a 'best effort' at receiving data using pure Python code--there is not interrupt
-    support so you might lose packets if they're sent too quickly for the board to process them.
-    You will have the most luck using this in simple low bandwidth scenarios like sending and
-    receiving a 60 byte packet at a time--don't try to receive many kilobytes of data at a time!
+.. note:: This is a 'best effort' at receiving data using pure Python code. You might lose packets
+    if they're sent too quickly for the board to process them.
 
-* Author(s): Tony DiCola, Jerry Needell
+* Author(s): Jerry Needell
 """
 
 import time
@@ -47,7 +45,7 @@ except ImportError:
 
 
 __version__ = "0.0.0+auto.0"
-__repo__ = "https://github.com/jerryneedell/CircuitPython_RFM.git"
+__repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_RFM.git"
 
 
 # Internal constants:
@@ -145,20 +143,18 @@ class RFM69(RFMSPI):
         transmission power.  The default is True as it supports the common RFM69HCW modules sold by
         Adafruit.
 
-    .. note:: The D0/interrupt line is currently unused by this module and can remain unconnected.
-
     Remember this library makes a best effort at receiving packets with pure Python code.  Trying
     to receive packets too quickly will result in lost data so limit yourself to simple scenarios
     of sending and receiving single packets at a time.
 
-    Also note this library tries to be compatible with raw RadioHead Arduino library communication.
+    Also note this library defaults to be compatible with RadioHead Arduino library communication.
     This means the library sets up the radio modulation to match RadioHead's default of GFSK
     encoding, 250kbit/s bitrate, and 250khz frequency deviation. To change this requires explicitly
-    setting the radio's bitrate and encoding register bits. Read the datasheet and study the init
-    function to see an example of this--advanced users only! Advanced RadioHead features like
-    address/node specific packets or "reliable datagram" delivery are supported however due to the
-    limitations noted, "reliable datagram" is still subject to missed packets but with it, the
-    sender is notified if a packe has potentially been missed.
+    setting the radio's bitrate and encoding register bits.
+    Read the datasheet and study the init function to see an example of this--advanced users only!
+    Advanced RadioHead features like address/node specific packets or "reliable datagram" delivery
+    are supported however due to the limitations noted, "reliable datagram" is still subject to
+    missed packets.
     """
 
     # Control bits from the registers of the chip:
@@ -646,12 +642,8 @@ class RFM69(RFMSPI):
         """Read the packet from the FIFO."""
         # Read the length of the FIFO.
         fifo_length = self.read_u8(_RF69_REG_00_FIFO)
-        # Handle if the received packet is too small to include the 4 byte
-        # RadioHead header and at least one byte of data --reject this packet and ignore it.
         if fifo_length > 0:  # read and clear the FIFO if anything in it
             packet = bytearray(fifo_length)
             # read the packet
             self.read_into(_RF69_REG_00_FIFO, packet, fifo_length)
-        if fifo_length < 5:
-            packet = None
         return packet

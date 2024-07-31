@@ -5,8 +5,6 @@ import board
 import busio
 import digitalio
 
-from adafruit_rfm import rfm9xfsk
-
 # Define radio parameters.
 RADIO_FREQ_MHZ = 915.0  # Frequency of the radio in Mhz. Must match your
 # module! Can be a value like 915.0, 433.0, etc.
@@ -19,15 +17,32 @@ RESET = digitalio.DigitalInOut(board.D25)
 spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
 
 # Initialze RFM radio
-rfm9x = rfm9xfsk.RFM9xFSK(spi, CS, RESET, RADIO_FREQ_MHZ)
+# uncommnet the desired import and rfm initialization depending on the radio boards being used
+
+# Use rfm9x for two RFM9x radios using LoRa
+
+# from adafruit_rfm import rfm9x
+
+# rfm = rfm9x.RFM9x(spi, CS, RESET, RADIO_FREQ_MHZ)
+
+# Use rfm9xfsk for two RFM9x radios or RFM9x to RFM69 using FSK
+
+from adafruit_rfm import rfm9xfsk
+
+rfm = rfm9xfsk.RFM9xFSK(spi, CS, RESET, RADIO_FREQ_MHZ)
+
+# Use rfm69 for two RFM69 radios using FSK
+
+# from adafruit_rfm import rfm69
+
+# rfm = rfm69.RFM69(spi, CS, RESET, RADIO_FREQ_MHZ)
 
 # set node addresses
-rfm9x.node = 100
-rfm9x.destination = 0xFF
-rfm9x.ack_delay = 0.1
+rfm.node = 100
+rfm.destination = 0xFF
 # send startup message from my_node
-rfm9x.send(
-    bytes(f"startup message from base {rfm9x.node}", "UTF-8"),
+rfm.send(
+    bytes(f"startup message from base {rfm.node}", "UTF-8"),
     keep_listening=True,
 )
 # Wait to receive packets.
@@ -36,11 +51,11 @@ print("Waiting for packets...")
 
 
 while True:
-    if rfm9x.payload_ready():
-        packet = rfm9x.receive_with_ack(with_header=True, timeout=None)
+    if rfm.payload_ready():
+        packet = rfm.receive(with_header=True, timeout=None)
         if packet is not None:
             # Received a packet!
             # Print out the raw bytes of the packet:
             print(f"Received (raw bytes): {packet}")
             print([hex(x) for x in packet])
-            print(f"RSSI: {rfm9x.last_rssi}")
+            print(f"RSSI: {rfm.last_rssi}")
