@@ -66,6 +66,7 @@ while True:
         # Received a packet!
         # Print out the raw bytes of the packet:
         print(f"Received (raw bytes): {packet}")
+        print("Hex data: ", [hex(x) for x in packet])
         # And decode to ASCII text and print it too.  Note that you always
         # receive raw bytes and need to convert to a text format like ASCII
         # if you intend to do string processing on your data.  Make sure the
@@ -74,7 +75,7 @@ while True:
             packet_text = str(packet, "ascii")
             print(f"Received (ASCII): {packet_text}")
         except UnicodeError:
-            print("Hex data: ", [hex(x) for x in packet])
+            pass
         # Also read the RSSI (signal strength) of the last received message and
         # print it.
         rssi = rfm.last_rssi
