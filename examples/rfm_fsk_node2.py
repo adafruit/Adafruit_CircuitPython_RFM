@@ -41,6 +41,16 @@ rfm = rfm9xfsk.RFM9xFSK(spi, CS, RESET, RADIO_FREQ_MHZ)
 
 # rfm = rfm69.RFM69(spi, CS, RESET, RADIO_FREQ_MHZ)
 
+# For RFM69 only: Optionally set an encryption key (16 byte AES key). MUST match both
+# on the transmitter and receiver (or be set to None to disable/the default).
+# rfm.encryption_key = None
+# rfm.encryption_key = (
+#    b"\x01\x02\x03\x04\x05\x06\x07\x08\x01\x02\x03\x04\x05\x06\x07\x08"
+# )
+
+# for OOK on RFM69 or RFM9xFSK
+# rfm.modulation_type = 1
+
 # Disable the RadioHead  Header
 rfm.radiohead = False
 # set the time interval (seconds) for sending packets
