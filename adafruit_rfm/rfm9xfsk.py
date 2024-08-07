@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 """
-`adafruit_rfm9xFSK`
+`adafruit_rfm.rfm9xfsk`
 ====================================================
 
 CircuitPython module for the RFM95/6/7/8 FSK 433/915mhz radio modules.
@@ -22,6 +22,7 @@ try:
 
     import busio
     import digitalio
+    from circuitpython_typing import ReadableBuffer
 
     try:
         from typing import Literal
@@ -490,6 +491,7 @@ class RFM9xFSK(RFMSPI):
         else:
             self.crc_on = 0
 
+    @property
     def crc_error(self) -> bool:
         """crc status"""
         return (self.read_u8(_RF95_REG_3F_IRQ_FLAGS_2) & 0x2) >> 1
@@ -552,7 +554,7 @@ class RFM9xFSK(RFMSPI):
         self.write_u8(_RF95_REG_3E_IRQ_FLAGS_1, 0xFF)
         self.write_u8(_RF95_REG_3F_IRQ_FLAGS_2, 0xFF)
 
-    def fill_fifo(self, payload: bytearray) -> None:
+    def fill_fifo(self, payload: ReadableBuffer) -> None:
         """Write the payload to the FIFO."""
         complete_payload = bytearray(1)  # prepend packet length to payload
         complete_payload[0] = len(payload)

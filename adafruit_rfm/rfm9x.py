@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 """
-`adafruit_rfm9x`
+`adafruit_rfm.rfm9x`
 ====================================================
 
 CircuitPython module for the RFM95/6/7/8 LoRa 433/915mhz radio modules.
@@ -20,6 +20,7 @@ from adafruit_rfm.rfm_common import RFMSPI
 try:
     import busio
     import digitalio
+    from circuitpython_typing import ReadableBuffer
 
     try:
         from typing import Literal
@@ -490,6 +491,7 @@ class RFM9x(RFMSPI):
                 self.read_u8(_RF95_REG_1E_MODEM_CONFIG2) & 0xFB,
             )
 
+    @property
     def crc_error(self) -> bool:
         """crc status"""
         return (self.read_u8(_RF95_REG_12_IRQ_FLAGS) & 0x20) >> 5
@@ -506,7 +508,7 @@ class RFM9x(RFMSPI):
         """Clear Interrupt flags"""
         self.write_u8(_RF95_REG_12_IRQ_FLAGS, 0xFF)
 
-    def fill_fifo(self, payload: bytearray) -> None:
+    def fill_fifo(self, payload: ReadableBuffer) -> None:
         """len_data is not used but is here for compatibility with rfm69
         Fill the FIFO with a packet to send"""
         self.write_u8(_RF95_REG_0D_FIFO_ADDR_PTR, 0x00)  # FIFO starts at 0.

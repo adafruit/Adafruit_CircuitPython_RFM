@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 """
-`adafruit_rfm69`
+`adafruit_rfm.rfm69`
 ====================================================
 
 CircuitPython RFM69 packet radio module. This supports sending and
@@ -33,12 +33,12 @@ try:
 except ImportError:
     pass
 
-
 try:
     from typing import Optional
 
     import busio
     import digitalio
+    from circuitpython_typing import ReadableBuffer
 
 except ImportError:
     pass
@@ -567,6 +567,7 @@ class RFM69(RFMSPI):
         else:
             self.crc_on = 0
 
+    @property
     def crc_error(self) -> bool:
         """crc status"""
         return (self.read_u8(_RF69_REG_28_IRQ_FLAGS2) & 0x2) >> 1
@@ -629,7 +630,7 @@ class RFM69(RFMSPI):
         self.write_u8(_RF69_REG_27_IRQ_FLAGS1, 0xFF)
         self.write_u8(_RF69_REG_28_IRQ_FLAGS2, 0xFF)
 
-    def fill_fifo(self, payload: bytearray) -> None:
+    def fill_fifo(self, payload: ReadableBuffer) -> None:
         """Write the payload to the FIFO."""
         complete_payload = bytearray(1)  # prepend packet length to payload
         complete_payload[0] = len(payload)

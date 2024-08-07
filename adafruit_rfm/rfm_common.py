@@ -336,6 +336,9 @@ class RFMSPI:
         return not timed_out
 
     send = asyncio_to_blocking(asyncio_send)
+    """Non-asyncio wrapper to Send a string of data using the transmitter
+    using the same arguments and keywords as asyncio_send()
+    """
 
     async def asyncio_send_with_ack(self, data: ReadableBuffer) -> bool:
         """Reliable Datagram mode:
@@ -377,6 +380,9 @@ class RFMSPI:
         return got_ack
 
     send_with_ack = asyncio_to_blocking(asyncio_send_with_ack)
+    """Non-asyncio wrapper to Send a string of data using the transmitter
+    using the same arguments and keywords as asyncio_send_with_ack()
+    """
 
     async def asyncio_receive(  # noqa: PLR0912
         self,
@@ -420,7 +426,7 @@ class RFMSPI:
         # Enter idle mode to stop receiving other packets.
         self.idle()
         if not timed_out:
-            if self.enable_crc and self.crc_error():
+            if self.enable_crc and self.crc_error:
                 self.crc_error_count += 1
             else:
                 packet = self.read_fifo()
@@ -447,6 +453,9 @@ class RFMSPI:
         return packet
 
     receive = asyncio_to_blocking(asyncio_receive)
+    """Non-asyncio wrapper to Receive a packet
+    using the same arguments and keywords as asyncio_receive()
+    """
 
     async def asyncio_receive_with_ack(  # noqa: PLR0912
         self,
@@ -490,7 +499,7 @@ class RFMSPI:
         # Enter idle mode to stop receiving other packets.
         self.idle()
         if not timed_out:
-            if self.enable_crc and self.crc_error():
+            if self.enable_crc and self.crc_error:
                 self.crc_error_count += 1
             else:
                 packet = self.read_fifo()
@@ -543,3 +552,6 @@ class RFMSPI:
         return packet
 
     receive_with_ack = asyncio_to_blocking(asyncio_receive_with_ack)
+    """Non-asyncio wrapper to Receive a packet
+    using the same arguments and keywords as asyncio_receive_with_ack()
+    """
