@@ -78,8 +78,6 @@ rfm.tx_power = 23
 
 # initialize counter
 counter = 0
-# send a broadcast mesage
-rfm.send(bytes(f"message number {counter}", "UTF-8"))
 
 # Wait to receive packets.
 print("Waiting for packets...")
@@ -94,13 +92,15 @@ while True:
         # Received a packet!
         print("Received (raw data): ", packet)
 
-        # Unpack and print contents
-        b = BytesIO()
-        b.write(packet)
-        b.seek(0)
-        unpacked_msg = msgpack.unpack(b)
-        print(f"Received (unpacked): {unpacked_msg}")
-
+        try:
+            # Unpack and print contents
+            b = BytesIO()
+            b.write(packet)
+            b.seek(0)
+            unpacked_msg = msgpack.unpack(b)
+            print(f"Received (unpacked): {unpacked_msg}")
+        except Exception as e:
+            print("Unable to unpack message")
         # send reading after any packet received
     if time.monotonic() - time_now > transmit_interval:
         # reset timeer
