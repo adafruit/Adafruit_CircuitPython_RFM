@@ -100,7 +100,9 @@ while True:
             unpacked_msg = msgpack.unpack(b)
             print(f"Received (unpacked): {unpacked_msg}")
         except Exception as e:
-            print("Unable to unpack message")
+            print("Unable to unpack message. Exception: ")
+            print(e)
+
         # send reading after any packet received
     if time.monotonic() - time_now > transmit_interval:
         # reset timeer
