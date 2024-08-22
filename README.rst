@@ -12,8 +12,8 @@ Introduction
     :alt: Discord
 
 
-.. image:: https://github.com/jerryneedell/Adafruit_CircuitPython_RFM/workflows/Build%20CI/badge.svg
-    :target: https://github.com/jerryneedell/Adafruit_CircuitPython_RFM/actions
+.. image:: https://github.com/adafruit/Adafruit_CircuitPython_RFM/workflows/Build%20CI/badge.svg
+    :target: https://github.com/adafruit/Adafruit_CircuitPython_RFM/actions
     :alt: Build Status
 
 
@@ -90,7 +90,7 @@ Or the following command to update an existing version:
 Usage Example
 =============
 
-See examples in the GitHub Repository.  <https://github.com/jerryneedell/Adafruit_CircuitPython_RFM.git>
+See examples in the GitHub Repository.  <https://github.com/adafruit/Adafruit_CircuitPython_RFM.git>
 
 Documentation
 =============
