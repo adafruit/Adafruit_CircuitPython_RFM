@@ -119,20 +119,20 @@ RX_MODE = 0b101
 class RFM9x(RFMSPI):
     """Interface to a RFM95/6/7/8 LoRa radio module.  Allows sending and
     receiving bytes of data in long range LoRa mode at a support board frequency
-    (433/915mhz).
+    (433/915 MHz).
 
     You must specify the following parameters:
     - spi: The SPI bus connected to the radio.
     - cs: The CS pin DigitalInOut connected to the radio.
     - reset: The reset/RST pin DigialInOut connected to the radio.
-    - frequency: The frequency (in mhz) of the radio module (433/915mhz typically).
+    - frequency: The frequency (in MHz) of the radio module (433/915 MHz typically).
 
     You can optionally specify:
     - preamble_length: The length in bytes of the packet preamble (default 8).
     - high_power: Boolean to indicate a high power board (RFM95, etc.).  Default
     is True for high power.
-    - baudrate: Baud rate of the SPI connection, default is 10mhz but you might
-    choose to lower to 1mhz if using long wires or a breadboard.
+    - baudrate: Baud rate of the SPI connection, default is 10 MHz but you might
+    choose to lower to MHz if using long wires or a breadboard.
     - agc: Boolean to Enable/Disable Automatic Gain Control - Default=False (AGC off)
     - crc: Boolean to Enable/Disable Cyclic Redundancy Check - Default=True (CRC Enabled)
     Remember this library makes a best effort at receiving packets with pure
@@ -196,8 +196,8 @@ class RFM9x(RFMSPI):
         self.module = "RFM9X"
         self.max_packet_length = 252
         self.high_power = high_power
-        # Device support SPI mode 0 (polarity & phase = 0) up to a max of 10mhz.
-        # Set Default Baudrate to 5MHz to avoid problems
+        # Device support SPI mode 0 (polarity & phase = 0) up to a max of 10 MHz.
+        # Set Default Baudrate to 5 MHz to avoid problems
         # self._device = spidev.SPIDevice(spi, cs, baudrate=baudrate, polarity=0, phase=0)
         # Setup reset as a digital output - initially High
         # This line is pulled low as an output quickly to trigger a reset.
@@ -221,7 +221,7 @@ class RFM9x(RFMSPI):
         self.long_range_mode = True
         if self.operation_mode != SLEEP_MODE or not self.long_range_mode:
             raise RuntimeError("Failed to configure radio for LoRa mode, check wiring!")
-        # clear default setting for access to LF registers if frequency > 525MHz
+        # clear default setting for access to LF registers if frequency > 525 MHz
         if frequency > 525:
             self.low_frequency_mode = 0
         # Setup entire 256 byte FIFO
