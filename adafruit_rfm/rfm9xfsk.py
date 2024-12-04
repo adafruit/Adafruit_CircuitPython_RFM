@@ -567,6 +567,7 @@ class RFM9xFSK(RFMSPI):
         """Read the data from the FIFO."""
         # Read the length of the FIFO.
         fifo_length = self.read_u8(_RF95_REG_00_FIFO)
+        packet = None  # return None if FIFO empty
         if fifo_length > 0:  # read and clear the FIFO if anything in it
             packet = bytearray(fifo_length)
             # read the packet

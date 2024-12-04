@@ -131,7 +131,7 @@ class RFM9x(RFMSPI):
     - preamble_length: The length in bytes of the packet preamble (default 8).
     - high_power: Boolean to indicate a high power board (RFM95, etc.).  Default
     is True for high power.
-    - baudrate: Baud rate of the SPI connection, default is 10mhz but you might
+    - baudrate: Baud rate of the SPI connection, default is 5mhz but you might
     choose to lower to 1mhz if using long wires or a breadboard.
     - agc: Boolean to Enable/Disable Automatic Gain Control - Default=False (AGC off)
     - crc: Boolean to Enable/Disable Cyclic Redundancy Check - Default=True (CRC Enabled)
@@ -521,6 +521,7 @@ class RFM9x(RFMSPI):
         """Read the data from the FIFO."""
         # Read the length of the FIFO.
         fifo_length = self.read_u8(_RF95_REG_13_RX_NB_BYTES)
+        packet = None  # return None if FIFO empty
         if fifo_length > 0:  # read and clear the FIFO if anything in it
             packet = bytearray(fifo_length)
             current_addr = self.read_u8(_RF95_REG_10_FIFO_RX_CURRENT_ADDR)
