@@ -517,7 +517,7 @@ class RFM9x(RFMSPI):
         # Write payload and header length.
         self.write_u8(_RF95_REG_22_PAYLOAD_LENGTH, len(payload))
 
-    def read_fifo(self) -> bytearray:
+    def read_fifo(self) -> Optional[bytearray]:
         """Read the data from the FIFO."""
         # Read the length of the FIFO.
         fifo_length = self.read_u8(_RF95_REG_13_RX_NB_BYTES)
