@@ -23,7 +23,7 @@ try:
     from circuitpython_typing import ReadableBuffer
 
     try:
-        from typing import Literal
+        from typing import Literal, Optional
     except ImportError:
         from typing_extensions import Literal
 
