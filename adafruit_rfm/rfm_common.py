@@ -430,7 +430,7 @@ class RFMSPI:
                 self.crc_error_count += 1
             else:
                 packet = self.read_fifo()
-                if self.radiohead:
+                if (packet is not None) and self.radiohead:
                     if len(packet) < 5:
                         # reject the packet if it is too small to contain the RAdioHead Header
                         packet = None
@@ -503,7 +503,7 @@ class RFMSPI:
                 self.crc_error_count += 1
             else:
                 packet = self.read_fifo()
-                if self.radiohead:
+                if (packet is not None) and self.radiohead:
                     if len(packet) < 5:
                         # reject the packet if it is too small to contain the RAdioHead Header
                         packet = None
