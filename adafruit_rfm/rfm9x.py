@@ -496,7 +496,7 @@ class RFM9x(RFMSPI):
             )
 
     @property
-    def payload_length(self) -> bool:
+    def payload_length(self) -> int:
         """Must be set when using Implicit Header Mode - required for SF = 6"""
         return self.read_u8(_RF95_REG_22_PAYLOAD_LENGTH)
 
