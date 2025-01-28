@@ -43,9 +43,6 @@ if rfm.spreading_factor == 12:
 elif rfm.spreading_factor > 7:
     rfm.receive_timeout = 2
 print("receive_timeout set to: ", rfm.receive_timeout)
-# set node addresses
-# rfm.node = 100
-# rfm.destination = 0xFF
 rfm.enable_crc = True
 # send startup message
 message = bytes(f"startup message from base", "UTF-8")
