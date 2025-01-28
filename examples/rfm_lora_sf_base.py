@@ -29,25 +29,39 @@ rfm = rfm9x.RFM9x(spi, CS, RESET, RADIO_FREQ_MHZ)
 
 rfm.radiohead = False  # don't appent RadioHead heade
 # set spreading factor
-rfm.spreading_factor = 6
+rfm.spreading_factor = 7
 print("spreading factor set to :", rfm.spreading_factor)
-# rfm.ack_wait = 1
-# rfm.xmit_timeout = 5
-# rfm.low_datarate_optimize = 1
+print("low_datarate_optimize set to: ", rfm.low_datarate_optimize)
+# rfm.signal_bandwidth = 500000
+print("signal_bandwidth set to :", rfm.signal_bandwidth)
+print("low_datarate_optimize set to: ", rfm.low_datarate_optimize)
+if rfm.spreading_factor == 12:
+    rfm.xmit_timeout = 5
+print("xmit_timeout set to: ", rfm.xmit_timeout)
+if rfm.spreading_factor == 12:
+    rfm.receive_timeout = 5
+elif rfm.spreading_factor > 7:
+    rfm.receive_timeout = 2
+print("receive_timeout set to: ", rfm.receive_timeout)
 # set node addresses
 # rfm.node = 100
 # rfm.destination = 0xFF
 rfm.enable_crc = True
-payload = bytearray(40)
-# rfm.payload_length = len(payload) + 4 # add 4 for RadioHEad header
-rfm.payload_length = len(payload)
-# send startup message from my_node
+# send startup message
 message = bytes(f"startup message from base", "UTF-8")
-payload[0 : len(message)] = message
-rfm.send(
-    payload,
-    keep_listening=True,
-)
+if rfm.spreading_factor == 6:
+    payload = bytearray(40)
+    rfm.payload_length = len(payload)
+    payload[0 : len(message)] = message
+    rfm.send(
+        payload,
+        keep_listening=True,
+    )
+else:
+    rfm.send(
+        message,
+        keep_listening=True,
+    )
 # Wait to receive packets.
 print("Waiting for packets...")
 # initialize flag and timer
@@ -67,11 +81,18 @@ while True:
             packet_received = True
             last_transmit_time = time.monotonic()
     if packet_received and (time.monotonic() - last_transmit_time) > transmit_delay:
-        payload = bytearray(40)
-        # message = bytes(f"packet received","UTF-8")
-        payload[0 : len(packet)] = packet
-        rfm.send(
-            payload,
-            keep_listening=True,
-        )
+        # send back the received packet
+        if rfm.spreading_factor == 6:
+            payload = bytearray(40)
+            rfm.payload_length = len(payload)
+            payload[0 : len(packet)] = packet
+            rfm.send(
+                payload,
+                keep_listening=True,
+            )
+        else:
+            rfm.send(
+                packet,
+                keep_listening=True,
+            )
         packet_received = False
