@@ -50,12 +50,8 @@ rfm.enable_crc = True
 # set the time interval (seconds) for sending packets
 transmit_interval = 10
 
-# set node addresses
-# rfm.node = 1
-# rfm.destination = 100
 # initialize counter
 counter = 0
-ack_failed_counter = 0
 # send startup message from my_node
 message = bytes(f"startup message from node", "UTF-8")
 if rfm.spreading_factor == 6:
@@ -75,7 +71,7 @@ else:
 # Wait to receive packets.
 print("Waiting for packets...")
 # initialize flag and timer
-time_now = time.monotonic()
+last_transmit_time = time.monotonic()
 while True:
     # Look for a new packet: only accept if addresses to my_node
     packet = rfm.receive()
@@ -87,9 +83,9 @@ while True:
         print([hex(x) for x in packet])
         print(f"RSSI: {rfm.last_rssi}")
         # send reading after any packet received
-    if time.monotonic() - time_now > transmit_interval:
+    if time.monotonic() - last_transmit_time > transmit_interval:
         # reset timeer
-        time_now = time.monotonic()
+        last_transmit_time = time.monotonic()
         # send a  mesage to destination_node from my_node
         message = bytes(f"message from node {counter}", "UTF-8")
         if rfm.spreading_factor == 6:

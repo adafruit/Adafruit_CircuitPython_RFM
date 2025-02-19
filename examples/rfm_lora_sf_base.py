@@ -62,7 +62,8 @@ else:
 # Wait to receive packets.
 print("Waiting for packets...")
 # initialize flag and timer
-transmit_delay = 5
+# set a delay before sending the echo packet
+transmit_delay = 0.5
 last_transmit_time = 0
 packet_received = False
 while True:
@@ -77,7 +78,7 @@ while True:
             print(f"RSSI: {rfm.last_rssi}")
             packet_received = True
             last_transmit_time = time.monotonic()
-    if packet_received and (time.monotonic() - last_transmit_time) > transmit_delay:
+    if packet_received and ((time.monotonic() - last_transmit_time) > transmit_delay):
         # send back the received packet
         if rfm.spreading_factor == 6:
             payload = bytearray(40)
