@@ -63,7 +63,9 @@ else:
 print("Waiting for packets...")
 # initialize flag and timer
 # set a delay before sending the echo packet
-transmit_delay = 0.5
+# avoide multibples of .5 second to minimize chances of node missing
+# the packet between receive attempts
+transmit_delay = 0.75
 last_transmit_time = 0
 packet_received = False
 while True:
