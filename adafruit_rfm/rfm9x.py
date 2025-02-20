@@ -169,6 +169,8 @@ class RFM9x(RFMSPI):
 
     auto_agc = RFMSPI.RegisterBits(_RF95_REG_26_MODEM_CONFIG3, offset=2, bits=1)
 
+    header_mode = RFMSPI.RegisterBits(_RF95_REG_1D_MODEM_CONFIG1, offset=0, bits=1)
+
     low_datarate_optimize = RFMSPI.RegisterBits(_RF95_REG_26_MODEM_CONFIG3, offset=3, bits=1)
 
     lna_boost_hf = RFMSPI.RegisterBits(_RF95_REG_0C_LNA, offset=0, bits=2)
@@ -424,6 +426,11 @@ class RFM9x(RFMSPI):
             else:
                 self.write_u8(0x2F, 0x44)
             self.write_u8(0x30, 0)
+        # set low_datarate_optimize for signal duration > 16 ms
+        if 1000 / (self.signal_bandwidth / (1 << self.spreading_factor)) > 16:
+            self.low_datarate_optimize = 1
+        else:
+            self.low_datarate_optimize = 0
 
     @property
     def coding_rate(self) -> Literal[5, 6, 7, 8]:
@@ -461,14 +468,21 @@ class RFM9x(RFMSPI):
 
         if val == 6:
             self.detection_optimize = 0x5
+            self.header_mode = 1  # enable implicit header mode
         else:
             self.detection_optimize = 0x3
+            self.header_mode = 0  # enable exlicit header mode
 
         self.write_u8(_RF95_DETECTION_THRESHOLD, 0x0C if val == 6 else 0x0A)
         self.write_u8(
             _RF95_REG_1E_MODEM_CONFIG2,
             ((self.read_u8(_RF95_REG_1E_MODEM_CONFIG2) & 0x0F) | ((val << 4) & 0xF0)),
         )
+        # set low_datarate_optimize for signal duration > 16 ms
+        if 1000 / (self.signal_bandwidth / (1 << self.spreading_factor)) > 16:
+            self.low_datarate_optimize = 1
+        else:
+            self.low_datarate_optimize = 0
 
     @property
     def enable_crc(self) -> bool:
@@ -490,6 +504,16 @@ class RFM9x(RFMSPI):
                 _RF95_REG_1E_MODEM_CONFIG2,
                 self.read_u8(_RF95_REG_1E_MODEM_CONFIG2) & 0xFB,
             )
+
+    @property
+    def payload_length(self) -> int:
+        """Must be set when using Implicit Header Mode - required for SF = 6"""
+        return self.read_u8(_RF95_REG_22_PAYLOAD_LENGTH)
+
+    @payload_length.setter
+    def payload_length(self, val: int) -> None:
+        # Set payload length
+        self.write_u8(_RF95_REG_22_PAYLOAD_LENGTH, val)
 
     @property
     def crc_error(self) -> bool:
