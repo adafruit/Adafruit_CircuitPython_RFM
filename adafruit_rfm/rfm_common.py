@@ -528,6 +528,7 @@ class RFMSPI:
                                 node=packet[0],
                                 identifier=packet[2],
                                 flags=(packet[3] | _RH_FLAGS_ACK),
+                                keep_listening=keep_listening,
                             )
                             # reject Retries if we have seen this idetifier from this source before
                             if (self.seen_ids[packet[1]] == packet[2]) and (
