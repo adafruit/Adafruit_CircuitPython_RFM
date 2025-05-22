@@ -178,7 +178,7 @@ class RFMSPI:
         """
         self.ack_retries = 5
         """The number of ACK retries before reporting a failure."""
-        self.ack_delay = None
+        self.ack_delay: float = None
         """The delay time before attemting to send an ACK.
            If ACKs are being missed try setting this to .1 or .2.
         """
