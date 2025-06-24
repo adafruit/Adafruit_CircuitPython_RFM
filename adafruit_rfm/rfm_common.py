@@ -286,13 +286,6 @@ class RFMSPI:
 
         Returns: True if success or False if the send timed out.
         """
-        # Disable pylint warning to not use length as a check for zero.
-        # This is a puzzling warning as the below code is clearly the most
-        # efficient and proper way to ensure a precondition that the provided
-        # buffer be within an expected range of bounds. Disable this check.
-        # pylint: disable=len-as-condition
-        assert 0 < len(data) <= self.max_packet_length
-        # pylint: enable=len-as-condition
         self.idle()  # Stop receiving to clear FIFO and keep it clear.
         # Combine header and data to form payload
         if self.radiohead:
@@ -318,6 +311,13 @@ class RFMSPI:
             payload = destination.to_bytes(1, "big") + data
         else:
             payload = data
+        # Disable pylint warning to not use length as a check for zero.
+        # This is a puzzling warning as the below code is clearly the most
+        # efficient and proper way to ensure a precondition that the provided
+        # buffer be within an expected range of bounds. Disable this check.
+        # pylint: disable=len-as-condition
+        assert 0 < len(payload) <= self.max_packet_length
+        # pylint: enable=len-as-condition
         self.fill_fifo(payload)
         # Turn on transmit mode to send out the packet.
         self.transmit()
