@@ -67,8 +67,8 @@ transmit_interval = 5
 # word, encryption, frequency deviation, or other settings!
 
 # You can however adjust the transmit power (in dB).  The default is 13 dB but
-# high power radios like the RFM95 can go up to 23 dB:
-rfm.tx_power = 23
+# high power radios like the RFM95 can go up to 23 dB, and RFM98PW can go up to 30 dB:
+rfm.tx_power = 30  # Unlock maximum power for RFM98PW (satellite communication)
 
 
 # initialize counter

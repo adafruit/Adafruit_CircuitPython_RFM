@@ -91,6 +91,9 @@ _RF95_DETECTION_THRESHOLD = const(0x37)
 _RF95_PA_DAC_DISABLE = const(0x04)
 _RF95_PA_DAC_ENABLE = const(0x07)
 
+# RFM98PW max power constants - for unlocking full 30 dBm potential
+_RF95_OCP_MAX_POWER = const(0x3F)  # Disable OCP for maximum power output
+
 # The crystal oscillator frequency of the module
 _RF95_FXOSC = 32000000.0
 
@@ -171,7 +174,9 @@ class RFM9x(RFMSPI):
 
     header_mode = RFMSPI.RegisterBits(_RF95_REG_1D_MODEM_CONFIG1, offset=0, bits=1)
 
-    low_datarate_optimize = RFMSPI.RegisterBits(_RF95_REG_26_MODEM_CONFIG3, offset=3, bits=1)
+    low_datarate_optimize = RFMSPI.RegisterBits(
+        _RF95_REG_26_MODEM_CONFIG3, offset=3, bits=1
+    )
 
     lna_boost_hf = RFMSPI.RegisterBits(_RF95_REG_0C_LNA, offset=0, bits=2)
 
@@ -323,14 +328,15 @@ class RFM9x(RFMSPI):
 
     @property
     def tx_power(self) -> int:
-        """The transmit power in dBm. Can be set to a value from 5 to 23 for
+        """The transmit power in dBm. Can be set to a value from 5 to 30 for
         high power devices (RFM95/96/97/98, high_power=True) or -1 to 14 for low
         power devices. Only integer power levels are actually set (i.e. 12.5
         will result in a value of 12 dBm).
+        For RFM98PW modules: Values above 23 dBm will unlock maximum power mode
+        by disabling over-current protection, allowing up to 30 dBm output.
         The actual maximum setting for high_power=True is 20dBm but for values > 20
         the PA_BOOST will be enabled resulting in an additional gain of 3dBm.
-        The actual setting is reduced by 3dBm.
-        The reported value will reflect the reduced setting.
+        For values > 23, OCP is disabled for maximum power output.
         """
         if self.high_power:
             return self.output_power + 5
@@ -340,17 +346,28 @@ class RFM9x(RFMSPI):
     def tx_power(self, val: int) -> None:
         val = int(val)
         if self.high_power:
-            if val < 5 or val > 23:
-                raise RuntimeError("tx_power must be between 5 and 23")
+            if val < 5 or val > 30:
+                raise RuntimeError("tx_power must be between 5 and 30")
+
+            # Configure for maximum power (RFM98PW capability)
+            if val > 23:
+                # Unlock maximum power by disabling over-current protection
+                self.write_u8(_RF95_REG_0B_OCP, _RF95_OCP_MAX_POWER)
+                self.pa_dac = _RF95_PA_DAC_ENABLE
+                self.pa_select = True
+                # Set output power to maximum (0x0F = 15)
+                self.output_power = 0x0F
             # Enable power amp DAC if power is above 20 dB.
             # Lower setting by 3db when PA_BOOST enabled - see Data Sheet  Section 6.4
-            if val > 20:
+            elif val > 20:
                 self.pa_dac = _RF95_PA_DAC_ENABLE
                 val -= 3
+                self.pa_select = True
+                self.output_power = (val - 5) & 0x0F
             else:
                 self.pa_dac = _RF95_PA_DAC_DISABLE
-            self.pa_select = True
-            self.output_power = (val - 5) & 0x0F
+                self.pa_select = True
+                self.output_power = (val - 5) & 0x0F
         else:
             assert -1 <= val <= 14
             self.pa_select = False
