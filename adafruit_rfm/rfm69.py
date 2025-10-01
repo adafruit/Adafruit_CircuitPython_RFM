@@ -310,6 +310,7 @@ class RFM69(RFMSPI):
 
         .. warning:: Reading this will STOP any receiving/sending that might be happening!
         """
+        self.idle()  # set radio idle before reading temperature
         # Start a measurement then poll the measurement finished bit.
         self.temp_start = 1
         while self.temp_running > 0:
