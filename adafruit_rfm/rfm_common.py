@@ -417,6 +417,11 @@ class RFMSPI:
             # Make sure we are listening for packets.
             self.listen()
             timed_out = await asyncio_check_timeout(self.payload_ready, timeout, self.timeout_poll)
+        if timed_out and not self.payload_ready():
+            # Return if timed out without clearing FIFO
+            if not keep_listening:
+                self.idle()
+            return None
         # Payload ready is set, a packet is in the FIFO.
         packet = None
         # save last RSSI reading
@@ -425,24 +430,23 @@ class RFMSPI:
 
         # Enter idle mode to stop receiving other packets.
         self.idle()
-        if not timed_out:
-            if self.enable_crc and self.crc_error:
-                self.crc_error_count += 1
-            else:
-                packet = self.read_fifo()
-                if (packet is not None) and self.radiohead:
-                    if len(packet) < 5:
-                        # reject the packet if it is too small to contain the RAdioHead Header
+        if self.enable_crc and self.crc_error:
+            self.crc_error_count += 1
+        else:
+            packet = self.read_fifo()
+            if (packet is not None) and self.radiohead:
+                if len(packet) < 5:
+                    # reject the packet if it is too small to contain the RAdioHead Header
+                    packet = None
+                if packet is not None:
+                    if (
+                        self.node != _RH_BROADCAST_ADDRESS  # noqa: PLR1714
+                        and packet[0] != _RH_BROADCAST_ADDRESS
+                        and packet[0] != self.node
+                    ):
                         packet = None
-                    if packet is not None:
-                        if (
-                            self.node != _RH_BROADCAST_ADDRESS  # noqa: PLR1714
-                            and packet[0] != _RH_BROADCAST_ADDRESS
-                            and packet[0] != self.node
-                        ):
-                            packet = None
-                        if not with_header and packet is not None:  # skip the header if not wanted
-                            packet = packet[4:]
+                    if not with_header and packet is not None:  # skip the header if not wanted
+                        packet = packet[4:]
         # Listen again if necessary and return the result packet.
         if keep_listening:
             self.listen()
@@ -490,6 +494,11 @@ class RFMSPI:
             # Make sure we are listening for packets.
             self.listen()
             timed_out = await asyncio_check_timeout(self.payload_ready, timeout, self.timeout_poll)
+        if timed_out and not self.payload_ready():
+            # Return if timed out without clearing FIFO
+            if not keep_listening:
+                self.idle()
+            return None
         # Payload ready is set, a packet is in the FIFO.
         packet = None
         # save last RSSI reading
@@ -498,51 +507,50 @@ class RFMSPI:
 
         # Enter idle mode to stop receiving other packets.
         self.idle()
-        if not timed_out:
-            if self.enable_crc and self.crc_error:
-                self.crc_error_count += 1
-            else:
-                packet = self.read_fifo()
-                if (packet is not None) and self.radiohead:
-                    if len(packet) < 5:
-                        # reject the packet if it is too small to contain the RAdioHead Header
+        if self.enable_crc and self.crc_error:
+            self.crc_error_count += 1
+        else:
+            packet = self.read_fifo()
+            if (packet is not None) and self.radiohead:
+                if len(packet) < 5:
+                    # reject the packet if it is too small to contain the RAdioHead Header
+                    packet = None
+                if packet is not None:
+                    if (
+                        self.node != _RH_BROADCAST_ADDRESS  # noqa: PLR1714
+                        and packet[0] != _RH_BROADCAST_ADDRESS
+                        and packet[0] != self.node
+                    ):
                         packet = None
-                    if packet is not None:
-                        if (
-                            self.node != _RH_BROADCAST_ADDRESS  # noqa: PLR1714
-                            and packet[0] != _RH_BROADCAST_ADDRESS
-                            and packet[0] != self.node
+                    # send ACK unless this was an ACK or a broadcast
+                    elif ((packet[3] & _RH_FLAGS_ACK) == 0) and (
+                        packet[0] != _RH_BROADCAST_ADDRESS
+                    ):
+                        # delay before sending Ack to give receiver a chance to get ready
+                        if self.ack_delay is not None:
+                            await asyncio.sleep(self.ack_delay)
+                        # send ACK packet to sender (data is b'!')
+                        await self.asyncio_send(
+                            b"!",
+                            destination=packet[1],
+                            node=packet[0],
+                            identifier=packet[2],
+                            flags=(packet[3] | _RH_FLAGS_ACK),
+                            keep_listening=keep_listening,
+                        )
+                        # reject Retries if we have seen this idetifier from this source before
+                        if (self.seen_ids[packet[1]] == packet[2]) and (
+                            packet[3] & _RH_FLAGS_RETRY
                         ):
                             packet = None
-                        # send ACK unless this was an ACK or a broadcast
-                        elif ((packet[3] & _RH_FLAGS_ACK) == 0) and (
-                            packet[0] != _RH_BROADCAST_ADDRESS
-                        ):
-                            # delay before sending Ack to give receiver a chance to get ready
-                            if self.ack_delay is not None:
-                                await asyncio.sleep(self.ack_delay)
-                            # send ACK packet to sender (data is b'!')
-                            await self.asyncio_send(
-                                b"!",
-                                destination=packet[1],
-                                node=packet[0],
-                                identifier=packet[2],
-                                flags=(packet[3] | _RH_FLAGS_ACK),
-                                keep_listening=keep_listening,
-                            )
-                            # reject Retries if we have seen this idetifier from this source before
-                            if (self.seen_ids[packet[1]] == packet[2]) and (
-                                packet[3] & _RH_FLAGS_RETRY
-                            ):
-                                packet = None
-                            else:  # save the packet identifier for this source
-                                self.seen_ids[packet[1]] = packet[2]
-                        if (
-                            packet is not None and (packet[3] & _RH_FLAGS_ACK) != 0
-                        ):  # Ignore it if it was an ACK packet
-                            packet = None
-                        if not with_header and packet is not None:  # skip the header if not wanted
-                            packet = packet[4:]
+                        else:  # save the packet identifier for this source
+                            self.seen_ids[packet[1]] = packet[2]
+                    if (
+                        packet is not None and (packet[3] & _RH_FLAGS_ACK) != 0
+                    ):  # Ignore it if it was an ACK packet
+                        packet = None
+                    if not with_header and packet is not None:  # skip the header if not wanted
+                        packet = packet[4:]
         # Listen again if necessary and return the result packet.
         if keep_listening:
             self.listen()
