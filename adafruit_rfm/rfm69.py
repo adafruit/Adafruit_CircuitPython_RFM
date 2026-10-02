@@ -78,6 +78,7 @@ _RF69_REG_2F_SYNC_VALUE1 = const(0x2F)
 _RF69_REG_39_NODE_ADDR = const(0x39)
 _RF69_REG_3A_BROADCAST_ADDR = const(0x3A)
 _RF69_REG_37_PACKET_CONFIG1 = const(0x37)
+_RF69_REG_38_PAYLOAD_LENGTH = const(0x38)
 _RF69_REG_3C_FIFO_THRESH = const(0x3C)
 _RF69_REG_3D_PACKET_CONFIG2 = const(0x3D)
 _RF69_REG_3E_AES_KEY1 = const(0x3E)
@@ -234,6 +235,7 @@ class RFM69(RFMSPI):
         # by default.  Users with advanced knowledge can manually reconfigure
         # for any other mode (consulting the datasheet is absolutely
         # necessary!).
+        self.payload_length = 0x40  # used for fixed-length payloads
         self.modulation_shaping = 0b01  # Gaussian filter, BT=1.0
         self.bitrate = 250000  # 250kbs
         self.frequency_deviation = 250000  # 250khz
@@ -349,6 +351,20 @@ class RFM69(RFMSPI):
             while not self.mode_ready:
                 if time.monotonic() - start >= 1:
                     raise TimeoutError("Operation Mode failed to set.")
+
+    @property
+    def payload_length(self) -> int:
+        return self.read_u8(_RF69_REG_38_PAYLOAD_LENGTH)
+
+    @payload_length.setter
+    def payload_length(self, val: int) -> None:
+        """The maximum length of the packet being read. If variable packet
+        lengths are used (packet_format=1) then this specifies the maximum
+        length in Rx (not used for Tx). If fixed packet lengths are used
+        (packet_format=0), this specified the payload length in Rx and Tx.
+        """
+        assert 0 <= val <= 255  # FIFO size is 66 bytes
+        self.write_u8(_RF69_REG_38_PAYLOAD_LENGTH, val)
 
     @property
     def sync_word(self) -> bytearray:
@@ -633,17 +649,27 @@ class RFM69(RFMSPI):
 
     def fill_fifo(self, payload: ReadableBuffer) -> None:
         """Write the payload to the FIFO."""
-        complete_payload = bytearray(1)  # prepend packet length to payload
-        complete_payload[0] = len(payload)
-        # put the payload lengthe in the beginning of the packet for RFM69
-        complete_payload = complete_payload + payload
-        # Write payload to transmit fifo
-        self.write_from(_RF69_REG_00_FIFO, complete_payload)
+        if self.packet_format:
+            complete_payload = bytearray(1)  # prepend packet length to payload
+            complete_payload[0] = len(payload)
+            # put the payload lengthe in the beginning of the packet for RFM69
+            complete_payload = complete_payload + payload
+            # Write payload to transmit fifo
+            self.write_from(_RF69_REG_00_FIFO, complete_payload)
+        else:
+            # Write payload to transmit fifo
+            self.write_from(_RF69_REG_00_FIFO, payload)
 
     def read_fifo(self) -> Optional[bytearray]:
         """Read the packet from the FIFO."""
         # Read the length of the FIFO.
-        fifo_length = self.read_u8(_RF69_REG_00_FIFO)
+        # If packet length is variable read the length from the first byte of
+        # the FIFO otherwise use the specified packet length
+        if self.packet_format:
+            fifo_length = self.read_u8(_RF69_REG_00_FIFO)
+        else:
+            fifo_length = self.payload_length
+
         packet = None  # return None if FIFO empty
         if fifo_length > 0:  # read and clear the FIFO if anything in it
             packet = bytearray(fifo_length)
