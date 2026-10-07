@@ -64,16 +64,7 @@ rfm.encryption_key = None
 # print("Sent Hello World message!")
 
 rfm.packet_format = 0
-rfm.preamble_length = 5
-rfm.modulation_shaping = 0
-rfm.frequency_deviation = 35000
-rfm.bitrate = 17241
 rfm.payload_length = 20
-rfm.dio_mapping = 0b01
-rfm.dc_free = 0
-rfm.rx_bw_dcc_freq = 0b010
-rfm.rx_bw_mantissa = 0b0
-rfm.rx_bw_exponent = 0b0
 rfm.crc = False
 rfm.crc_auto_clear_off = True
 rfm.radiohead = False

@@ -15,10 +15,10 @@ RADIO_FREQ_MHZ = 915.00  # Frequency of the radio in Mhz. Must match your
 # module! Can be a value like 915.0, 433.0, etc.
 
 # Define pins connected to the chip, use these if wiring up the breakout according to the guide:
-CS = digitalio.DigitalInOut(board.CE1)
-RESET = digitalio.DigitalInOut(board.D25)
-# CS = digitalio.DigitalInOut(board.D20)
-# RESET = digitalio.DigitalInOut(board.D21)
+# CS = digitalio.DigitalInOut(board.CE1)
+# RESET = digitalio.DigitalInOut(board.D25)
+CS = digitalio.DigitalInOut(board.D20)
+RESET = digitalio.DigitalInOut(board.D21)
 # CS = digitalio.DigitalInOut(board.RFM_CS)
 # RESET = digitalio.DigitalInOut(board.RFM_RST)
 
@@ -36,15 +36,15 @@ spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
 
 # Use rfm9xfsk for two RFM9x radios or RFM9x to RFM69 using FSK
 
-from adafruit_rfm import rfm9xfsk
+# from adafruit_rfm import rfm9xfsk
 
-rfm = rfm9xfsk.RFM9xFSK(spi, CS, RESET, RADIO_FREQ_MHZ)
+# rfm = rfm9xfsk.RFM9xFSK(spi, CS, RESET, RADIO_FREQ_MHZ)
 
 # Use rfm69 for two RFM69 radios using FSK
 
-# from adafruit_rfm import rfm69
+from adafruit_rfm import rfm69
 
-# rfm = rfm69.RFM69(spi, CS, RESET, RADIO_FREQ_MHZ)
+rfm = rfm69.RFM69(spi, CS, RESET, RADIO_FREQ_MHZ)
 
 # For RFM69 only: Optionally set an encryption key (16 byte AES key). MUST match both
 # on the transmitter and receiver (or be set to None to disable/the default).
@@ -64,16 +64,7 @@ rfm.encryption_key = None
 # call will wait for the previous one to finish before continuing.
 
 rfm.packet_format = 0
-rfm.preamble_length = 5
-rfm.modulation_shaping = 0
-rfm.frequency_deviation = 35000
-rfm.bitrate = 17241
 rfm.payload_length = 20
-rfm.dio_mapping = 0b01
-rfm.dc_free = 0
-rfm.rx_bw_dcc_freq = 0b010
-rfm.rx_bw_mantissa = 0b0
-rfm.rx_bw_exponent = 0b0
 rfm.crc = False
 rfm.crc_auto_clear_off = True
 rfm.radiohead = False

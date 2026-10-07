@@ -23,10 +23,10 @@ RADIO_FREQ_MHZ = 915.00  # Frequency of the radio in Mhz. Must match your
 # Define pins connected to the chip, use these if wiring up the breakout according to the guide:
 # CS = digitalio.DigitalInOut(board.CE1)
 # RESET = digitalio.DigitalInOut(board.D25)
-CS = digitalio.DigitalInOut(board.D20)
-RESET = digitalio.DigitalInOut(board.D21)
-# CS = digitalio.DigitalInOut(board.RFM_CS)
-# RESET = digitalio.DigitalInOut(board.RFM_RST)
+# CS = digitalio.DigitalInOut(board.D20)
+# RESET = digitalio.DigitalInOut(board.D21)
+CS = digitalio.DigitalInOut(board.RFM_CS)
+RESET = digitalio.DigitalInOut(board.RFM_RST)
 
 # Initialize SPI bus.
 spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
@@ -95,12 +95,12 @@ while True:
     # If no packet was received during the timeout then None is returned.
     if packet is None:
         # Packet has not been received
-        print("Received nothing! Listening again...")
+        # print("Received nothing! Listening again...")
+        pass
     # Received a packet!
     elif checksum(packet):
         # Print out the raw bytes of the packet:
         print(f"Received (raw bytes): {packet}")
-        print(f"Checksum : {checksum(packet)}")
         # And decode to ASCII text and print it too.  Note that you always
         # receive raw bytes and need to convert to a text format like ASCII
         # if you intend to do string processing on your data.  Make sure the
