@@ -8,6 +8,14 @@ import board
 import busio
 import digitalio
 
+
+def checksum(message) -> bool:
+    if message is not None and len(message) > 2:
+        message_sum = sum(message[0 : len(message) - 1])
+        return message_sum & 0xFF == message[len(message) - 1]
+    return False
+
+
 # Define radio parameters.
 RADIO_FREQ_MHZ = 915.00  # Frequency of the radio in Mhz. Must match your
 # module! Can be a value like 915.0, 433.0, etc.
@@ -88,10 +96,11 @@ while True:
     if packet is None:
         # Packet has not been received
         print("Received nothing! Listening again...")
-    else:
-        # Received a packet!
+    # Received a packet!
+    elif checksum(packet):
         # Print out the raw bytes of the packet:
         print(f"Received (raw bytes): {packet}")
+        print(f"Checksum : {checksum(packet)}")
         # And decode to ASCII text and print it too.  Note that you always
         # receive raw bytes and need to convert to a text format like ASCII
         # if you intend to do string processing on your data.  Make sure the
