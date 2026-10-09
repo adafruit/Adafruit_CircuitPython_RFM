@@ -319,16 +319,16 @@ class RFM9xFSK(RFMSPI):
 
     @property
     def payload_length(self) -> int:
+        """The maximum length of the packet being read. If variable packet
+        lengths are used (packet_format=1) then this specifies the maximum
+        length in Rx (not used for Tx). If fixed packet lengths are used
+        (packet_format=0), this specifies the payload length in Rx and Tx.
+        """
         return self.read_u8(_RF95_REG_32_PAYLOAD_LENGTH)
 
     @payload_length.setter
     def payload_length(self, val: int) -> None:
-        """The maximum length of the packet being read. If variable packet
-        lengths are used (packet_format=1) then this specifies the maximum
-        length in Rx (not used for Tx). If fixed packet lengths are used
-        (packet_format=0), this specified the payload length in Rx and Tx.
-        """
-        assert 0 <= val <= 255  # FIFO size is 66 bytes
+        assert 0 <= val <= 255
         self.write_u8(_RF95_REG_32_PAYLOAD_LENGTH, val)
 
     @property
