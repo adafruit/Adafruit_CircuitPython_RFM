@@ -275,6 +275,7 @@ class RFM9xFSK(RFMSPI):
         self.afc_bw_mantissa = 0b00
         self.afc_bw_exponent = 0b000
         self.packet_format = 1  # Variable length.
+        self.payload_length = 0x40  # max rx for variable length packets
         self.dc_free = 0b10  # Whitening
         # Set transmit power to 13 dBm, a safe value any module supports.
         self._tx_power = 13
@@ -315,6 +316,20 @@ class RFM9xFSK(RFMSPI):
         """
         self.operation_mode = TX_MODE
         self.dio0_mapping = 0b00  # Interrupt on tx done.
+
+    @property
+    def payload_length(self) -> int:
+        """The maximum length of the packet being read. If variable packet
+        lengths are used (packet_format=1) then this specifies the maximum
+        length in Rx (not used for Tx). If fixed packet lengths are used
+        (packet_format=0), this specifies the payload length in Rx and Tx.
+        """
+        return self.read_u8(_RF95_REG_32_PAYLOAD_LENGTH)
+
+    @payload_length.setter
+    def payload_length(self, val: int) -> None:
+        assert 0 <= val <= 255
+        self.write_u8(_RF95_REG_32_PAYLOAD_LENGTH, val)
 
     @property
     def sync_word(self) -> bytearray:
@@ -556,17 +571,26 @@ class RFM9xFSK(RFMSPI):
 
     def fill_fifo(self, payload: ReadableBuffer) -> None:
         """Write the payload to the FIFO."""
-        complete_payload = bytearray(1)  # prepend packet length to payload
-        complete_payload[0] = len(payload)
-        # put the payload lengthe in the beginning of the packet for RFM69
-        complete_payload = complete_payload + payload
-        # Write payload to transmit fifo
-        self.write_from(_RF95_REG_00_FIFO, complete_payload)
+        if self.packet_format:
+            complete_payload = bytearray(1)  # prepend packet length to payload
+            complete_payload[0] = len(payload)
+            # put the payload length in the beginning of the packet for RFM69
+            complete_payload = complete_payload + payload
+            # Write payload to transmit fifo
+            self.write_from(_RF95_REG_00_FIFO, complete_payload)
+        else:
+            # Write payload to transmit fifo
+            self.write_from(_RF95_REG_00_FIFO, payload)
 
     def read_fifo(self) -> Optional[bytearray]:
-        """Read the data from the FIFO."""
+        """Read the packet from the FIFO."""
         # Read the length of the FIFO.
-        fifo_length = self.read_u8(_RF95_REG_00_FIFO)
+        # If packet length is variable read the length from the first byte of
+        # the FIFO otherwise use the specified packet length
+        if self.packet_format:
+            fifo_length = self.read_u8(_RF95_REG_00_FIFO)
+        else:
+            fifo_length = self.payload_length
         packet = None  # return None if FIFO empty
         if fifo_length > 0:  # read and clear the FIFO if anything in it
             packet = bytearray(fifo_length)

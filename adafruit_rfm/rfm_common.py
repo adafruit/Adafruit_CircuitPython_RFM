@@ -317,6 +317,9 @@ class RFMSPI:
         # buffer be within an expected range of bounds. Disable this check.
         # pylint: disable=len-as-condition
         assert 0 < len(payload) <= self.max_packet_length
+        # for fixed length packets verify that the packet is the correct size
+        if getattr(self, "packet_format", 1) == 0:
+            assert len(payload) == self.payload_length
         # pylint: enable=len-as-condition
         self.fill_fifo(payload)
         # Turn on transmit mode to send out the packet.
