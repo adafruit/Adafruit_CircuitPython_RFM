@@ -23,8 +23,8 @@ RESET = digitalio.DigitalInOut(board.RFM_RST)
 # Initialize SPI bus.
 spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
 
-# Initialze RFM radio
-# uncommnet the desired import and rfm initialization depending on the radio boards being used
+# Initialize RFM radio
+# uncomment the desired import and rfm initialization depending on the radio boards being used
 
 # Use rfm9x for two RFM9x radios using LoRa
 
