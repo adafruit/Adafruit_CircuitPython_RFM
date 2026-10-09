@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2024 Ladyada for Adafruit Industries
 # SPDX-License-Identifier: MIT
 
-# Simple demo of sending and recieving data with the RFM9x or RFM69 radios.
+# Simple demo of sending and receiving data with the RFM9x or RFM69 radios.
 # Author: Jerry Needell
 
 import time
