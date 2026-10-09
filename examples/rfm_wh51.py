@@ -79,7 +79,6 @@ rfm.modulation_shaping = 0
 rfm.frequency_deviation = 35000
 rfm.bitrate = 17241
 rfm.payload_length = 14
-rfm.dio_mapping = 0b01
 rfm.dc_free = 0
 rfm.rx_bw_dcc_freq = 0b010
 rfm.rx_bw_mantissa = 0b0
