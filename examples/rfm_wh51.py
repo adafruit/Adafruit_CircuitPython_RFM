@@ -66,7 +66,7 @@ rfm.encryption_key = None
 # rfm.modulation_type = 1
 
 # Send a packet.  Note you can only send a packet containing up to 60 bytes for an RFM69
-# and 252 bytes forn  an RFM9x.
+# and 252 bytes for an RFM9x.
 # This is a limitation of the radio packet size, so if you need to send larger
 # amounts of data you will need to break it into smaller send calls.  Each send
 # call will wait for the previous one to finish before continuing.
