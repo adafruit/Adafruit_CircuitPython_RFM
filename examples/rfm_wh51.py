@@ -4,6 +4,8 @@
 # Simple demo of sending and recieving data with the RFM9x or RFM69 radios.
 # Author: Jerry Needell
 
+import time
+
 import board
 import busio
 import digitalio
@@ -23,10 +25,10 @@ RADIO_FREQ_MHZ = 915.00  # Frequency of the radio in Mhz. Must match your
 # Define pins connected to the chip, use these if wiring up the breakout according to the guide:
 # CS = digitalio.DigitalInOut(board.CE1)
 # RESET = digitalio.DigitalInOut(board.D25)
-# CS = digitalio.DigitalInOut(board.D20)
-# RESET = digitalio.DigitalInOut(board.D21)
-CS = digitalio.DigitalInOut(board.RFM_CS)
-RESET = digitalio.DigitalInOut(board.RFM_RST)
+CS = digitalio.DigitalInOut(board.D20)
+RESET = digitalio.DigitalInOut(board.D21)
+# CS = digitalio.DigitalInOut(board.RFM_CS)
+# RESET = digitalio.DigitalInOut(board.RFM_RST)
 
 # Initialize SPI bus.
 spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
@@ -99,6 +101,7 @@ while True:
         pass
     # Received a packet!
     elif checksum(packet):
+        print(time.monotonic())
         # Print out the raw bytes of the packet:
         print(f"Received (raw bytes): {packet}")
         # And decode to ASCII text and print it too.  Note that you always
