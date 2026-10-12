@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
 # SPDX-License-Identifier: MIT
 
-# Example using asyncio to receive and acknowledge packets.
+# Example using asyncio to receive and acknowledge RadioHead fornatted packets.
 import asyncio
 
 import board

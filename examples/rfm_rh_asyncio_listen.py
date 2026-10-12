@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
 # SPDX-License-Identifier: MIT
 
-# Example using asyncio to wait indefinitely for messages
+# Example using asyncio to wait indefinitely for RadioHead formatted  messages
 # to be received.
 import asyncio
 

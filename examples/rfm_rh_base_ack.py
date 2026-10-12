@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
 # SPDX-License-Identifier: MIT
 
+# Example using RadioHead Reliable DataGram Mode to receive and acknowledge addressed packets.
+
 import board
 import busio
 import digitalio

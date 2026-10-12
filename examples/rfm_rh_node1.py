@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
 # SPDX-License-Identifier: MIT
 
-# Example to send a packet periodically between addressed nodes
+# Example to send RadioHead format packets with addressing.
 # Author: Jerry Needell
 #
 import time

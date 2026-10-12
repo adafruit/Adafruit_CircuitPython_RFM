@@ -1,7 +1,8 @@
 # SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
 # SPDX-License-Identifier: MIT
 
-# Example to send a packet periodically between addressed nodes with ACK
+# Example to send/receive addressed packets using
+# the RadioHead Reliable Datagram mode (ACK)
 # Author: Jerry Needell
 #
 import time
