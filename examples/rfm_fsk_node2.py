@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2020 Jerry Needell for Adafruit Industries
 # SPDX-License-Identifier: MIT
 
-# Example to send a packet periodically
+# Example to send/receive FSK pakets using address filtering
 
 import time
 
@@ -71,7 +71,7 @@ rfm.encryption_key = None
 # initialize counter
 counter = 0
 # send a broadcast mesage
-rfm.send(bytes(f"message number {counter}", "UTF-8"), destination=destination)
+rfm.send(bytes(f"message number {counter}", "UTF-8"), destination=rfm.fsk_broadcast_address)
 
 # Wait to receive packets.
 print("Waiting for packets...")
