@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
 # SPDX-License-Identifier: MIT
 
+# Example for testing changes in spreading factor
+# The base receives a packet from the node and retransmits it
 import time
 
 import board
@@ -63,7 +65,7 @@ else:
 print("Waiting for packets...")
 # initialize flag and timer
 # set a delay before sending the echo packet
-# avoide multibples of .5 second to minimize chances of node missing
+# avoid multibples of .5 second to minimize chances of node missing
 # the packet between receive attempts
 transmit_delay = 0.75
 last_transmit_time = 0
