@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2024 Ladyada for Adafruit Industries
 # SPDX-License-Identifier: MIT
 
-# Simple demo of sending and receiving data with the RFM9x or RFM69 radios.
+# Simple example to transmit fixed length FSK packets  with the RFM9x or RFM69 radios.
 # Author: Jerry Needell
 
 import time
@@ -55,21 +55,13 @@ rfm.encryption_key = None
 
 # for OOK on RFM69 or RFM9xFSK
 # rfm.modulation_type = 1
-# rfm.modulation_type = 1
 
-# Send a packet.  Note you can only send a packet containing up to 60 bytes for an RFM69
-# and 252 bytes for an RFM9x.
-# This is a limitation of the radio packet size, so if you need to send larger
-# amounts of data you will need to break it into smaller send calls.  Each send
-# call will wait for the previous one to finish before continuing.
-
+# Enable fixed length packets
 rfm.packet_format = 0
 rfm.payload_length = 20
 rfm.crc = False
 rfm.crc_auto_clear_off = True
 rfm.radiohead = False
-# Wait to receive packets.
-print("Waiting for packets...")
 
 while True:
     rfm.send(bytes("0123456789012345678\r", "utf-8"))

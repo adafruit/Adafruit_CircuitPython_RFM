@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
 # SPDX-License-Identifier: MIT
 
+# Example to send/receive addressed packets using asyncio and
+# the RadioHead Reliable Datagram mode (ACK)
 import asyncio
 import time
 

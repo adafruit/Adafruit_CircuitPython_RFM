@@ -1,11 +1,8 @@
 # SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
 # SPDX-License-Identifier: MIT
 
-# Example using Interrupts to send a message and then wait indefinitely for messages
-# to be received. Interrupts are used only for receive. sending is done with polling.
-# This example is for systems that support interrupts like the Raspberry Pi with "blinka"
-# CircuitPython does not support interrupts so it will not work on  Circutpython boards
-# Author: Tony DiCola, Jerry Needell
+# Example using asyncio to wait indefinitely for RadioHead formatted  messages
+# to be received.
 import asyncio
 
 import board
@@ -54,12 +51,9 @@ rfm = rfm9x.RFM9x(spi, CS, RESET, RADIO_FREQ_MHZ)
 # for OOK on RFM69 or RFM9xFSK
 # rfm.modulation_type = 1
 
-# send startup message from my_node
-# rfm.send(bytes("startup message from node {}".format(rfm.node), "UTF-8"))
-rfm.listen()
 # Wait to receive packets.
+rfm.listen()
 print("Waiting for packets...")
-# initialize flag and timer
 
 
 # pylint: disable=too-few-public-methods

@@ -1,7 +1,9 @@
 # SPDX-FileCopyrightText: 2024 Ladyada for Adafruit Industries
 # SPDX-License-Identifier: MIT
 
-# Simple demo of sending and receiving data with the RFM9x or RFM69 radios.
+# Example for receiving fixed length FSK packets from an EcoWitt (FineOffset) WH51 soil sensor
+# see https://github.com/atricat/wh51-emulation-sx1276
+# for configuration and  packet decoding information
 # Author: Jerry Needell
 
 import time
@@ -63,15 +65,6 @@ rfm.encryption_key = None
 
 # for OOK on RFM69 or RFM9xFSK
 # rfm.modulation_type = 1
-# rfm.modulation_type = 1
-
-# Send a packet.  Note you can only send a packet containing up to 60 bytes for an RFM69
-# and 252 bytes for an RFM9x.
-# This is a limitation of the radio packet size, so if you need to send larger
-# amounts of data you will need to break it into smaller send calls.  Each send
-# call will wait for the previous one to finish before continuing.
-# rfm.send(bytes("Hello world!\r\n", "utf-8"))
-# print("Sent Hello World message!")
 
 rfm.packet_format = 0
 rfm.preamble_length = 5
@@ -91,8 +84,6 @@ print("Waiting for packets...")
 
 while True:
     packet = rfm.receive(timeout=2.0)
-    # Optionally change the receive timeout from its default of 0.5 seconds:
-    # packet = rfm9x.receive(timeout=5.0)
     # If no packet was received during the timeout then None is returned.
     if packet is None:
         # Packet has not been received

@@ -1,8 +1,8 @@
 # SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
 # SPDX-License-Identifier: MIT
 
-# Example to send a packet periodically between addressed nodes with ACK
-# Author: Jerry Needell
+# Example for testing changes in spreading factor
+# the node transmits a packet periodically
 #
 import time
 
